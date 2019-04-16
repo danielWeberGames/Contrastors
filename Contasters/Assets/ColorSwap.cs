@@ -11,25 +11,27 @@ public class ColorSwap : MonoBehaviour {
 
     public float incrument;
 
-    public int playerNum;
+    public string inputAxis;
+    public string inputAction;
+
 	// Use this for initialization
 	void Start () {
         sr = GetComponent<SpriteRenderer>();
         myColor = sr.color;
         Color.RGBToHSV(myColor, out hue, out s, out v);
+        changingValue = s;
 	}
 	
 	// Update is called once per frame
 	void Update () {
 
-        if (Input.GetButtonDown("Jump"))
+        if (Input.GetButtonDown(inputAction))
         {
-            if(Input.GetAxis("Vertical") > 0)
+            if(Input.GetAxis(inputAxis) >0 || Input.GetAxis(inputAxis) < 0)
             {
-                ChangeColor(1);
-            }else if (Input.GetAxis("Vertical") < 0)
-            {
-                ChangeColor(-1);
+                int dir = Mathf.RoundToInt(Input.GetAxisRaw(inputAxis));
+                Debug.Log(dir);
+                ChangeColor(dir);
             }
         }
 
@@ -39,15 +41,9 @@ public class ColorSwap : MonoBehaviour {
     {
         if (dir > 0 && changingValue<1 || dir <0 && changingValue >0)
         {
-            if (playerNum > 0)
-            {
-                s += incrument * dir;
-                changingValue = s;
-            }else
-            {
-                v += incrument * dir;
-                changingValue = v;
-            }
+            s += incrument * dir;
+            changingValue = s;
+            
             myColor = Color.HSVToRGB(hue, s, v);
             sr.color = myColor;
         }
