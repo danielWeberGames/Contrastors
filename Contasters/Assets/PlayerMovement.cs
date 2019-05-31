@@ -9,9 +9,15 @@ public class PlayerMovement : MonoBehaviour
 
     public float speed;
     public float jumpForce;
+    public float gravity;
+    public float downGravity;
+    bool grounded;
 
     Rigidbody2D rb;
     Animator anim;
+
+    public Vector2 velocity;
+
 
     float inputDir;
     // Start is called before the first frame update
@@ -24,9 +30,15 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float movement = speed * inputDir * Time.deltaTime;
+        velocity.x = speed * inputDir * Time.deltaTime;
 
-        rb.MovePosition(transform.position + transform.right * movement);
+        if(Input.GetButtonDown(jumpAction))
+        {
+            velocity.y += jumpForce;
+            grounded = false;
+        }
+        GravityMath();
+        rb.MovePosition(rb.position + velocity);
 
     }
 
@@ -34,20 +46,41 @@ public class PlayerMovement : MonoBehaviour
     {
         inputDir = Input.GetAxis(moveAxis);
 
-        if(inputDir != 0)
+        if(inputDir >0 || inputDir<0)
         {
-            anim.SetFloat("Speed", Mathf.Abs(inputDir));
             if(Mathf.Sign(inputDir) != Mathf.Sign(transform.localScale.x))
             {
                 transform.localScale = new Vector3(-transform.localScale.x, 1, 1);
             }
         }
+        anim.SetFloat("Speed", Mathf.Abs(inputDir));
 
-        if (Input.GetButtonDown(jumpAction))
+    }
+
+    void GravityMath()
+    {
+        if (!grounded)
         {
-            rb.AddForce(transform.up * jumpForce);
+            if(velocity.y > 0)
+            {
+                velocity.y -= gravity * Time.deltaTime;
+            }
+            else
+            {
+                velocity.y -= downGravity * Time.deltaTime;
+            }
+
+        }
+        else
+        {
+            velocity.y = 0;
         }
 
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        grounded = true;
     }
 
 }
